@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSL Socket 工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-shield-alt me-2"></i>SSL Socket 工具
+                </a>
+                <div class="navbar-nav ms-auto">
+                    <span class="navbar-text" id="status-indicator">
+                        <i class="fas fa-circle text-secondary me-1"></i>就绪
+                    </span>
+                </div>
+            </div>
+        </nav>
+
+        <div class="row">
+            <!-- 证书管理面板 -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-certificate me-2"></i>证书管理
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 上传证书 -->
+                        <div class="mb-4">
+                            <h6>上传证书文件</h6>
+                            <form id="upload-form" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="cert-file" class="form-label">选择文件</label>
+                                    <input type="file" class="form-control" id="cert-file" accept=".pem,.crt,.key,.p12,.pfx">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cert-type" class="form-label">文件类型</label>
+                                    <select class="form-select" id="cert-type">
+                                        <option value="cert">服务器证书</option>
+                                        <option value="key">私钥</option>
+                                        <option value="ca">CA证书</option>
+                                        <option value="client_cert">客户端证书</option>
+                                        <option value="client_key">客户端私钥</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload me-1"></i>上传
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- 证书列表 -->
+                        <div>
+                            <h6>已上传的证书</h6>
+                            <div id="certificate-list" class="list-group">
+                                <!-- 证书列表将在这里动态加载 -->
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm mt-2" onclick="loadCertificates()">
+                                <i class="fas fa-refresh me-1"></i>刷新列表
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SSL服务器面板 -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-server me-2"></i>SSL 服务器
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="server-form">
+                            <div class="row mb-3">
+                                <div class="col-8">
+                                    <label for="server-host" class="form-label">主机</label>
+                                    <input type="text" class="form-control" id="server-host" value="localhost">
+                                </div>
+                                <div class="col-4">
+                                    <label for="server-port" class="form-label">端口</label>
+                                    <input type="number" class="form-control" id="server-port" value="8443">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="server-cert" class="form-label">服务器证书</label>
+                                <select class="form-select" id="server-cert">
+                                    <option value="">选择证书文件</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="server-key" class="form-label">服务器私钥</label>
+                                <select class="form-select" id="server-key">
+                                    <option value="">选择私钥文件</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="require-client-cert">
+                                    <label class="form-check-label" for="require-client-cert">
+                                        要求客户端证书（双向认证）
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="ca-cert-section" style="display: none;">
+                                <label for="server-ca" class="form-label">CA证书</label>
+                                <select class="form-select" id="server-ca">
+                                    <option value="">选择CA证书</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success" id="start-server-btn">
+                                    <i class="fas fa-play me-1"></i>启动服务器
+                                </button>
+                                <button type="button" class="btn btn-danger" id="stop-server-btn" disabled>
+                                    <i class="fas fa-stop me-1"></i>停止服务器
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="server-status" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SSL客户端面板 -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-desktop me-2"></i>SSL 客户端
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="client-form">
+                            <div class="row mb-3">
+                                <div class="col-8">
+                                    <label for="client-host" class="form-label">目标主机</label>
+                                    <input type="text" class="form-control" id="client-host" value="localhost">
+                                </div>
+                                <div class="col-4">
+                                    <label for="client-port" class="form-label">端口</label>
+                                    <input type="number" class="form-control" id="client-port" value="8443">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="verify-server" checked>
+                                    <label class="form-check-label" for="verify-server">
+                                        验证服务器证书
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="client-ca-section">
+                                <label for="client-ca" class="form-label">CA证书（验证服务器）</label>
+                                <select class="form-select" id="client-ca">
+                                    <option value="">使用系统默认CA</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="use-client-cert">
+                                    <label class="form-check-label" for="use-client-cert">
+                                        使用客户端证书
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="client-cert-section" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="client-cert" class="form-label">客户端证书</label>
+                                    <select class="form-select" id="client-cert">
+                                        <option value="">选择客户端证书</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="client-key" class="form-label">客户端私钥</label>
+                                    <select class="form-select" id="client-key">
+                                        <option value="">选择客户端私钥</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" id="connect-client-btn">
+                                    <i class="fas fa-link me-1"></i>连接服务器
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="disconnect-client-btn" disabled>
+                                    <i class="fas fa-unlink me-1"></i>断开连接
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="client-status" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- 消息测试 -->
+                <div class="card" id="message-panel" style="display: none;">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-comments me-2"></i>消息测试
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="message-input" class="form-label">发送消息</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="message-input" placeholder="输入消息...">
+                                <button class="btn btn-primary" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="message-log" class="border rounded p-2" style="height: 200px; overflow-y: auto; background-color: #f8f9fa;">
+                            <!-- 消息日志 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 状态提示模态框 -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">操作结果</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

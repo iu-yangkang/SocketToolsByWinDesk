@@ -1,0 +1,248 @@
+/* SSL Socket 工具样式 */
+
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --dark-color: #212529;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+#status-indicator {
+    font-size: 0.9rem;
+}
+
+.status-connected {
+    color: var(--success-color) !important;
+}
+
+.status-error {
+    color: var(--danger-color) !important;
+}
+
+.status-warning {
+    color: var(--warning-color) !important;
+}
+
+/* 证书列表样式 */
+.certificate-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: white;
+    transition: all 0.15s ease-in-out;
+}
+
+.certificate-item:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.certificate-item .cert-name {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.certificate-item .cert-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.certificate-item .cert-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+    display: inline-block;
+}
+
+.cert-status.valid {
+    background-color: #d1e7dd;
+    color: #0a3622;
+}
+
+.cert-status.invalid {
+    background-color: #f8d7da;
+    color: #58151c;
+}
+
+/* 状态消息样式 */
+.status-message {
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+.status-success {
+    background-color: #d1e7dd;
+    border: 1px solid #a3cfbb;
+    color: #0a3622;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    border: 1px solid #f1aeb5;
+    color: #58151c;
+}
+
+.status-info {
+    background-color: #cff4fc;
+    border: 1px solid #addce4;
+    color: #055160;
+}
+
+/* 消息日志样式 */
+#message-log {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.log-entry {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border-left: 4px solid transparent;
+}
+
+.log-sent {
+    background-color: #e3f2fd;
+    border-left-color: #2196f3;
+}
+
+.log-received {
+    background-color: #f3e5f5;
+    border-left-color: #9c27b0;
+}
+
+.log-error {
+    background-color: #ffebee;
+    border-left-color: #f44336;
+}
+
+.log-timestamp {
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+/* 表单增强样式 */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn {
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .row > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+}
+
+/* 动画效果 */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 加载动画 */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
