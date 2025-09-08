@@ -1,0 +1,14 @@
+{
+  "name": "ssl-socket-tools",
+  "version": "1.0.0",
+  "description": "SSL Socket Tools with Mutual/One-way Authentication",
+  "main": "app.js",
+  "scripts": {
+    "dev": "python app.py",
+    "start": "gunicorn -w 4 -b 0.0.0.0:5000 app:app",
+    "build": "echo 'Build completed'"
+  },
+  "keywords": ["ssl", "socket", "certificate", "authentication"],
+  "author": "SSL Tools Developer",
+  "license": "MIT"
+}
